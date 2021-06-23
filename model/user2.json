@@ -1,0 +1,21 @@
+[{
+  "_id": {
+    "$oid": "6096b0f6b45393b6a8e85224"
+  },
+  "address_line_1": "123 sub st",
+  "address_line_2": "apt 1",
+  "bio": "Best Player",
+  "cash": "400",
+  "city": "Atl",
+  "email": "shotechs2@gmail.com",
+  "firstName": "Dan",
+  "lastName": "Bobo",
+  "moneyType": "$",
+  "password": "",
+  "state": "VA",
+  "token": "",
+  "user_image": "assets\\\\icons\\\\user.png",
+  "username": "shotechs",
+  "zip_code": "20743",
+  "user_id": 1
+}]

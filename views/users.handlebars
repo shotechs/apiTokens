@@ -1,0 +1,12 @@
+<h1>{{title}}</h1>
+<p>userName: {{userName}}<br>
+  cash: {{cash}}
+
+</p>
+
+
+<ul class="list-group">
+  {{#each user}}
+  <li class="list-group-item">{{this.userName}}: {{this.cash}}</li>
+  {{/each}}
+</ul>

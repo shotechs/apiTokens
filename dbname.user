@@ -1,0 +1,34 @@
+[{
+  "_id": {
+    "$oid": "5f68fd4fbe5d196d6879afe7"
+  },
+  "name": "shotechs",
+  "email": "shotechs@gmail.com",
+  "password": "$2a$10$WYtb16sGyAIUNgsjFIi8eua3m/c1H2dvZZmIZGvFDmOBs0a925Dey",
+  "date": {
+    "$date": "2020-09-21T19:21:51.229Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "5f68fdc9be5d196d6879afe8"
+  },
+  "name": "shotechs2",
+  "email": "shotechs2@gmail.com",
+  "password": "$2a$10$upJ1h6E6zaUZSfg5NZlm4uv/bXVV79pnM.S1govw/0qJKgD./8kSm",
+  "date": {
+    "$date": "2020-09-21T19:23:53.598Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "5f6900b51325c82bacaa83fa"
+  },
+  "name": "shotechs3",
+  "email": "shotechs3@gmail.com",
+  "password": "$2a$10$JcgDsgLsoqweUsecP4WMae.zS9.F4CRGFfJYJm2uNa.pZgrtQxTbC",
+  "date": {
+    "$date": "2020-09-21T19:36:21.351Z"
+  },
+  "__v": 0
+}]
