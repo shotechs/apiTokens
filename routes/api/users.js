@@ -35,5 +35,38 @@ router.post('/', async (req, res) => {
 })
 
 
+const jwt = require("jsonwebtoken");
+
+const { userValidation } = require("../../validation/validation");
+
+router.post("/userUpdate", async (req, res) => {
+    //LETS VALIDATE user
+
+    //Todo add error
+    const { error } = userValidation(req.body);
+
+    if (error) {
+        return res.status(400).send(error.details[0].message);
+    }
+
+    //Checking if the email is already in the database
+    const user = await User.findOne({ email: req.body.email });
+
+    //no user found
+    if (!user) {
+        return res.status(400).send("Email or password is wrong");
+    }
+
+
+
+
+    //Create and assign a token
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+    res.header("auth-token", token).send(token);
+    // res.send("Logged in!");
+});
+
+module.exports = router;
+
 
 module.exports = router;

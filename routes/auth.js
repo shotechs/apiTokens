@@ -8,6 +8,7 @@ const {
   userValidation,
   registerValidation,
   loginValidation,
+  getUserValidation
 } = require("../validation/validation");
 
 
@@ -121,23 +122,21 @@ router.post("/login", async (req, res) => {
 
   const { error } = loginValidation(req.body);
   if (error) {
-    // return res.status(400).send(error.details[0].message);
     const msg = { auth: false, msg: 'Error:' + error.details[0].message }
     return res.status(400).json(msg);
   }
 
   //Checking if the email is already in the database
-  const user = await User.findOne({ username: req.body.username });
+  let user = await User.findOne({ email: req.body.email });
   if (!user) {
-    //  return res.status(400).send("Username or password is wrong");
-    const msg = { auth: false, msg: 'Error: Username or password is wrong' }
+    const msg = { auth: false, msg: 'Error: Email or password is wrong' }
     return res.status(400).json(msg);
   }
 
   const validPass = await bcrypt.compare(req.body.password, user.password);
   if (!validPass) {
     //return res.status(400).send("Username or password is wrong");
-    msg = { auth: false, msg: 'Error: Username or password is wrong' }
+    msg = { auth: false, msg: 'Error: Email or password is wrong' }
     return res.status(400).json(msg);
   }
 
@@ -145,6 +144,10 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
   // const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
   //res.header("auth-token", token).send("Logged in!" + token);
+
+
+  // delete user.password;
+  user.password = "";
   // req.session.user = user
   const msg = { auth: true, token: token, user: user }
 
@@ -152,10 +155,37 @@ router.post("/login", async (req, res) => {
   //res.send("Logged in!");
 });
 
-// router.get("/test", verify, async (req, res) => {
-//   res.json({ posts: { title: "my first post", description: "message" } });
-// });
+router.post("/userUpdate", async (req, res) => {
+  //LETS VALIDATE user
 
+  //Todo add error
+  const { error } = getUserValidation(req.body);
+
+  if (error) {
+    return res.status(400).send(error.details[0].message);
+  }
+
+  //Checking if the email is already in the database
+  const user = await User.findOne({ email: req.body.email });
+
+  //no user found
+  if (!user) {
+    return res.status(400).send("Email or password is wrong");
+  }
+
+
+
+
+  //Create and assign a token
+  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+  // delete user.password;
+  user.password = "";
+  // req.session.user = user
+  const msg = { auth: true, token: token, user: user }
+
+  res.header("auth-token", token).json(msg);
+  // res.send("User send Update");
+});
 
 
 module.exports = router;

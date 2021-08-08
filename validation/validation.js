@@ -119,17 +119,31 @@ const registerValidation = (data) => {
 //Login Validation
 const loginValidation = (data) => {
   const schema = Joi.object({
-    username: Joi.string()
-      .alphanum()
-      .min(3)
-      .max(30)
-      .case('lower')
+    email: Joi.string()
+      .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "edu", "gov"] } })
+      .min(5).case('lower')
       .required(),
     password: Joi.string().min(6).required(),
   });
   return schema.validate(data);
 };
 
+
+//Login Validation
+const getUserValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "edu", "gov"] } })
+      .min(5).case('lower')
+      .required(),
+  });
+  return schema.validate(data);
+};
+
+
+
+
+module.exports.getUserValidation = getUserValidation;
 module.exports.userValidation = userValidation;
 module.exports.gameValidation = gameValidation;
 module.exports.registerValidation = registerValidation;

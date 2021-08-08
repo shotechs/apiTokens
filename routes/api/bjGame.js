@@ -5,7 +5,8 @@ const mongoose = require("mongoose");
 const verify = require("../verifyToken");
 
 const Game = require('../../model/Game');
-
+const User = require("../../model/User");
+let saveUser;
 //const user_Id = "6096b0f6b45393b6a8e85224"
 
 // get randon number return
@@ -252,17 +253,18 @@ function playerhit(id, Game, playerHand) {
     //Current Game
     playingGame = Game
 
+    let handNum;
     // console.log("game", playingGame);
     // start
     if (playingGame.game_status != "Game Over") {
         if (playerHand == "H1") {
-            playerCards = playingGame.playerCards
+            handNum = 0
         } else if (playerHand == "H2") {
-            playerCards = playingGame.playerCards2
+            handNum = 1
         }
         // first hit int
         //var hitCount = playingGame.playerCards.hit
-        playingGame.playerCards[0].hit++
+        playingGame.playerCards[handNum].hit++
 
         //get card sj
         const hit_card_txt = getCard();
@@ -274,60 +276,49 @@ function playerhit(id, Game, playerHand) {
         //getCard is an ace
         if (hit_card_val == 11) {
             if (playerHand == "H1") {
-                playingGame.playerCards[0].p1HasAce = true;
-                hit_card_val = aceCheck(playingGame.playerCards[0].points);
+                playingGame.playerCards[handNum].p1HasAce = true;
+                hit_card_val = aceCheck(playingGame.playerCards[handNum].points);
             } else if (playerHand == "H2") {
                 p1HasAce = true;
-                playerCards = { ...playingGame.playerCards[0].p1HasAce, p1HasAce };
-                hit_card_val = aceCheck(playingGame.playerCards[0].points);
+                playerCards = { ...playingGame.playerCards[handNum].p1HasAce, p1HasAce };
+                hit_card_val = aceCheck(playingGame.playerCards[handNum].points);
                 console.log("game playerCards " + playerCards);
             }
         }
 
-
         //get card array
-        const card = playingGame.playerCards[0].card;
+        const card = playingGame.playerCards[handNum].card;
         //put card in array
         card.push(hit_card_txt);
 
         // add card to pc
-        playingGame.playerCards[0].card = card;
-        playingGame.playerCards[0].points = playingGame.playerCards[0].points + hit_card_val
+        playingGame.playerCards[handNum].card = card;
+        playingGame.playerCards[handNum].points = playingGame.playerCards[0].points + hit_card_val
         //player win
-        if (playingGame.playerCards[0].points == 21) {
-            playingGame.playerCards[0].status = "PLAYER WINS"
+        if (playingGame.playerCards[handNum].points == 21) {
+            playingGame.playerCards[handNum].status = "PLAYER WINS"
             playingGame.dealerCards.status = "Dealer LOSE"
             playingGame.game_status = "Game Over"
             playingGame.end_game_Date = new Date();
-
-        } else if (playingGame.playerCards[0].points > 21 && playingGame.playerCards[0].p1HasAce != true) {
-            playingGame.playerCards[0].status = "PLAYER LOSE"
+        } else if (playingGame.playerCards[handNum].points > 21 && playingGame.playerCards[handNum].p1HasAce != true) {
+            playingGame.playerCards[handNum].status = "PLAYER LOSE"
             playingGame.dealerCards.status = "Dealer WINS"
             playingGame.game_status = "Game Over"
             playingGame.end_game_Date = new Date();
-
         }
-
         // send back obj
         return playingGame;
     } else {
         // console.log("Game Over already");
         return { msg: "Game Over" }
-
     }
-
 }
 
 function dealerplay(id, Game) {
 
-
     // hand as of now
     //Current Game
     playingGame = Game
-
-
-    // player to false
-    playingGame.playerCards.status = false;
 
     // dealer to true
     playingGame.dealerCards.status = true;
@@ -341,8 +332,8 @@ function dealerplay(id, Game) {
         card.push(hitCard);
         playingGame.dealerCards.card = card;
 
-        const dealerCard_val_txt = hitCard.substring(1, 3);
-        const dealerCard_val = parseInt(cardnumber1(dealerCard_val_txt));
+        let dealerCard_val_txt = hitCard.substring(1, 3);
+        let dealerCard_val = parseInt(cardnumber1(dealerCard_val_txt));
         if (dealerCard_val == 11) {
 
             playingGame.dealerCards.deHasAce = true;
@@ -351,42 +342,74 @@ function dealerplay(id, Game) {
         playingGame.dealerCards.points = playingGame.dealerCards.points + dealerCard_val
     }
     if (playingGame.dealerCards.points >= 17) {
-        whoWon(playingGame.dealerCards.points, playingGame.playerCards.points)
+        // player to false
+        for (let game of playingGame.playerCards) {
+            game.status = false;
+            return whoWon(playingGame.dealerCards.points, game.points, game)
+        }
+        //  console.log("x.status" + playingGame);
+
     }
-    console.log("game won" + playingGame);
+
+    //  console.log("game won" + playingGame);
     return playingGame;
 
 }
 
 function whoWon(dealerCards, playerCards) {
+    playingGame.game_status = "Game Over";
 
-    if (dealerCards == playerCards) {
-        playingGame.game_status = "Game Over"
-        playingGame.playerCards.status = "DRAW"
-        playingGame.dealerCards.status = "DRAW"
-    } else if (dealerCards > playerCards && dealerCards <= 21) {
-        //console.log("dealerCards");
-        playingGame.game_status = "Game Over"
+    let handNum = 0
+    let user
+    async function f() {
 
-        playingGame.playerCards.status = "PLAYER LOSE"
-        playingGame.dealerCards.status = "Dealer WINS"
+        try {
+            // get user
+            user = await User.findOne({ _id: playingGame.user_id })
+            // math cards and cash
+            if (dealerCards == playerCards) {
+                playingGame.dealerCards.status = "DRAW"
+                playingGame.playerCards[0].status = "DRAW"
+                //console.log("bet ", playingGame.bet)
+                // no cash
 
+            } else if (dealerCards > playerCards && dealerCards <= 21) {
+                playingGame.dealerCards.status = "Dealer WINS"
+                playingGame.playerCards[0].status = "PLAYER LOSE"
+                user.cash = user.cash - playingGame.bet
+                console.log("bet ", playingGame.bet)
+                console.log("PLAYER LOSE ", user.cash)
+                // console.log("PLAYER LOSE ", playingGame.playerCards[0].status)
+            }
+            else if (dealerCards < playerCards || dealerCards > 21) {
+                playingGame.dealerCards.status = "Dealer LOSE"
+                playingGame.playerCards[0].status = "PLAYER WINS"
+                console.log("bet ", playingGame.bet)
+                user.cash = user.cash + playingGame.bet
+                console.log("PLAYER WINS ", user.cash)
+                // console.log("PLAYER WINS ", playingGame.playerCards[0].status)
+
+            }
+
+            try {
+                saveUser = await user.save();
+                //console.log("saveUser ", saveUser)
+                playingGame = await playingGame.save()
+                //console.log("updatedGame ", updatedGame)
+                return playingGame;
+
+            } catch (error) {
+                const msg = { msg: 'Error Cash:' + error }
+                return msg
+            }
+        } catch (error) {
+            console.log("Error: UserId not found", user)
+            const msg = { msg: 'Error: UserId not found' }
+            return msg
+        }
     }
-    else if (dealerCards < playerCards || dealerCards > 21) {
-        //console.log("playerCards");
-        playingGame.game_status = "Game Over"
-        playingGame.playerCards.status = "PLAYER WINS"
-        playingGame.dealerCards.status = "Dealer LOSE"
-    }
 
-
-
-    // user cash val
-    // if (cashTxt == 0) {
-    //     Game Over();
-    // }
-
-
+    return f();
 }
 
 
@@ -442,18 +465,15 @@ function splitplay(Game) {
             playingGame.playerCards2.status = "DRAW"
             playingGame.dealerCards.status = "DRAW"
             //   playingGame.dealerCards.status = "Dealer LOSE"
-            // playingGame.game_status = "Game Over"
             //   playingGame.end_game_Date = new Date();
         } else if (playingGame.playerCards2.points == 21) {
             playingGame.playerCards2.status = "PLAYER WINS"
 
             //   playingGame.dealerCards.status = "Dealer LOSE"
-            // playingGame.game_status = "Game Over"
             // playingGame.end_game_Date = new Date();
         } else if (playingGame.playerCards2.points > 21 && playingGame.playerCards2.p1HasAce != true) {
             playingGame.playerCards2.status = "PLAYER LOSE"
             //  playingGame.dealerCards.status = "Dealer WINS"
-            // playingGame.game_status = "Game Over"
             //   playingGame.end_game_Date = new Date();
         }
 
@@ -481,19 +501,16 @@ function splitplay(Game) {
         if (playingGame.playerCards.points == 21 && playingGame.dealerCards.points != 21) {
             playingGame.playerCards.status = "PLAYER WINS"
             //   playingGame.dealerCards.status = "Dealer LOSE"
-            // playingGame.game_status = "Game Over"
             // playingGame.end_game_Date = new Date();
         }
         else if (playingGame.playerCards.points == 21 && playingGame.dealerCards.points == 21) {
             playingGame.playerCards.status = "DRAW"
             playingGame.dealerCards.status = "DRAW"
-            // playingGame.game_status = "Game Over"
             // playingGame.end_game_Date = new Date();
         }
         else if (playingGame.playerCards.points > 21 && playingGame.playerCards.p1HasAce != true) {
             playingGame.playerCards.status = "PLAYER LOSE"
             // playingGame.dealerCards.status = "Dealer WINS"
-            // playingGame.game_status = "Game Over"
             // playingGame.end_game_Date = new Date();
         }
 
@@ -686,10 +703,13 @@ router.post('/deal', verify, async (req, res) => {
 
                 if (saveGame.game_status !== "Game Over") {
                     saveGame.dealerCards.card[0] = ""
+                    saveGame.dealerCards.points = ""
+                    saveGame.dealerCards.deHasAce = ""
+
                 }
 
 
-                console.log("saveGame ", saveGame);
+                // console.log("saveGame ", saveGame);
                 res.status(201).json(saveGame)
                 // console.log("saveGame ", newGame);
                 // res.status(201).json(newGame)
@@ -739,30 +759,24 @@ router.patch('/playerhit', verify, getGame, async (req, res) => {
 // Gets dealer Play
 router.patch('/dealerplay', verify, getGame, async (req, res) => {
 
+
+
     const gamePlaying = res.game
     if (gamePlaying.game_status != "Game Over") {
 
-        let dealerPlaying = dealerplay(req.body.id, gamePlaying)
+        let dealerPlaying = await dealerplay(req.body.id, gamePlaying)
         dealerPlaying.end_game_Date = new Date();
-
-
-        if (dealerPlaying.game_status !== "Game Over") {
-            dealerPlaying.dealerCards.card[0] = ""
-        } else {
-
-        }
-
-
         try {
             // todo save dealer playing
             //  const updatedGame = await dealerPlaying.save()
+            //res.json(dealerPlaying, saveUser)
             res.json(dealerPlaying)
         } catch (err) {
             res.status(400).json({ message: err.message })
         }
 
     } else {
-        res.json({ message: "Game Over" })
+        res.status(200).json({ message: "Game Over" })
     }
 }
 );
@@ -781,7 +795,9 @@ router.patch('/split', verify, getGame, async (req, res) => {
         try {
             //    const updatedGame = await splitGame.save()
             //    res.json(updatedGame)
-            res.json(splitGame)
+            //res.json(splitGame)
+            res.status(200).json(splitGame)
+
 
         } catch (err) {
             res.status(400).json({ message: 'Error' + err.message })
