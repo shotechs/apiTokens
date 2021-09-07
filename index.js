@@ -3,12 +3,8 @@ const app = express();
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const exphbs = require('express-handlebars');
-//const logger = require('./middleware/logger');
-//const user = require('./User');
-//const path = require('path');
 const cors = require('cors');
 
-//const members = require('./Members');
 dotenv.config();
 
 // Handlebars Middleware
@@ -54,11 +50,6 @@ const db = mongoose.connection
 db.on('error', (error) => console.error(error))
 db.once('open', () => console.log('Connected to Database'))
 
-
-
-
-
-
 // Homepage Route
 app.get('/', (req, res) =>
   res.render('users', {
@@ -70,10 +61,7 @@ app.get('/', (req, res) =>
 //Route Middlewares
 app.use("/api/user", authRoute);
 app.use("/api/posts", postsRoute);
-
 app.use("/api/users", usersRoute);
-
-
 app.use("/api/bjGame", bjGameRoute);
 
 const PORT = process.env.PORT || 5000
