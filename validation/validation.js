@@ -122,7 +122,6 @@ const registerValidation = (data) => {
     email: Joi.string()
       .email({
         minDomainSegments: 2,
-        tlds: { allow: ["com", "net", "edu", "gov"] },
       })
       .min(5)
       .case("lower")
@@ -140,7 +139,6 @@ const loginValidation = (data) => {
     email: Joi.string()
       .email({
         minDomainSegments: 2,
-        tlds: { allow: ["com", "net", "edu", "gov"] },
       })
       .min(5)
       .case("lower")
@@ -157,6 +155,20 @@ const getUserValidation = (data) => {
     email: Joi.string()
       .email({
         minDomainSegments: 2,
+      })
+      .min(5)
+      .case("lower")
+      .required()
+      .label(`Email`),
+  });
+  return schema.validate(data, options);
+};
+
+const userUpdatePasswordValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string()
+      .email({
+        minDomainSegments: 2,
         tlds: { allow: ["com", "net", "edu", "gov"] },
       })
       .min(5)
@@ -166,6 +178,9 @@ const getUserValidation = (data) => {
   });
   return schema.validate(data, options);
 };
+
+
+
 
 module.exports.getUserValidation = getUserValidation;
 module.exports.userValidation = userValidation;

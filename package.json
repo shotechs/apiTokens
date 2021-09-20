@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +22,7 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
     "mongoose": "^5.12.7",
+    "update": "^0.7.4",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

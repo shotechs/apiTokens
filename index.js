@@ -2,14 +2,14 @@ const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
-const exphbs = require('express-handlebars');
-const cors = require('cors');
+const exphbs = require("express-handlebars");
+const cors = require("cors");
 
 dotenv.config();
 
 // Handlebars Middleware
-app.engine('handlebars', exphbs());
-app.set('view engine', 'handlebars');
+app.engine("handlebars", exphbs());
+app.set("view engine", "handlebars");
 
 // Body Parser Middleware
 app.use(express.json());
@@ -21,9 +21,8 @@ app.use(cors());
 const authRoute = require("./routes/auth");
 const postsRoute = require("./routes/posts");
 
-const usersRoute = require('./routes/api/users');
-const bjGameRoute = require('./routes/api/bjGame');
-
+const usersRoute = require("./routes/api/users");
+const bjGameRoute = require("./routes/api/bjGame");
 
 //dotenv.config();
 
@@ -38,7 +37,6 @@ const bjGameRoute = require('./routes/api/bjGame');
 //   res.send('<h1>hello world</h1>')
 // });
 
-
 mongoose.connect(
   "mongodb://127.0.0.1:27017/bj_game",
   { useUnifiedTopology: true, useNewUrlParser: true },
@@ -46,24 +44,24 @@ mongoose.connect(
 );
 
 //mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
-const db = mongoose.connection
-db.on('error', (error) => console.error(error))
-db.once('open', () => console.log('Connected to Database'))
+const db = mongoose.connection;
+db.on("error", (error) => console.error(error));
+db.once("open", () => console.log("Connected to Database"));
 
 // Homepage Route
-app.get('/', (req, res) =>
-  res.render('users', {
-    title: 'User list',
-    // user
-  })
-);
+// app.get('/', (req, res) =>
+//   res.render('users', {
+//     title: 'User list',
+//     // user
+//   })
+// );
 
 //Route Middlewares
 app.use("/api/user", authRoute);
-app.use("/api/posts", postsRoute);
+//app.use("/api/posts", postsRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/bjGame", bjGameRoute);
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server Up and running ${PORT}`));

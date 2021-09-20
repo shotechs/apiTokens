@@ -127,4 +127,61 @@ router.post("/cashAdd", async (req, res) => {
     return res.status(400).json(msg);
   }
 });
+
+// update password
+router.patch("/userUpdatePassword", verify, async (req, res) => {
+  //LETS VALIDATE user
+  //console.log("req1", req.body);
+  //Todo add error
+  const { error } = userUpdatePasswordValidation(req.body);
+  //console.log("req2", req.body);
+  if (error) {
+    //console.log("error", error);
+    //return res.status(400).send(error.details[0].message);
+
+    msg = { auth: false, msg: error.details[0].message };
+    return res.status(400).json(msg);
+  }
+
+  //Checking if the email is already in the database
+  const user = await User.findOne({ email: req.body.email });
+  //console.log("user3", user);
+  //no user found
+  if (!user) {
+    msg = { auth: false, msg: "Error: Email is wrong" };
+    return res.status(400).json(msg);
+  } else {
+    //console.log("body", req.body);
+    //user update
+    user.username = req.body.username;
+    user.firstName = req.body.firstName;
+    user.lastName = req.body.lastName;
+    user.email = req.body.email;
+    user.moneyType = req.body.moneyType;
+    user.address_line_1 = req.body.address_line_1;
+    user.address_line_2 = req.body.address_line_2;
+    user.city = req.body.city;
+    user.state = req.body.state;
+    user.zip_code = req.body.zip_code;
+    user.bio = req.body.bio;
+    user.user_image = req.body.user_image;
+
+    try {
+      const saveUser = await user.save();
+      //Create and assign a token
+      const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+      // res.header("auth-token", token).send(token);
+      // res.send("Logged in!");
+      res
+        .header("auth-token", token)
+        .json({ auth: true, token: token, user: saveUser });
+
+      console.log("user", user);
+    } catch (error) {
+      const msg = { msg: "Error:" + error };
+      return res.status(400).json(msg);
+    }
+  }
+});
+
 module.exports = router;
