@@ -77,9 +77,8 @@ router.post("/register", async (req, res) => {
 		const msg = { msg: `Register Error: ${error.details[0].message}` }
 		
 		return res.status(400).json(msg);
-		//return res.status(400).json(error.details[0].message);
 	}
-console.log("req.body",req.body)
+//console.log("req.body",req.body)
 	//Checking if the user is already in the database
 	const emailExist = await User.findOne({ email: req.body.email });
 	if (emailExist) {
@@ -99,13 +98,18 @@ console.log("req.body",req.body)
 		password: hashedPassowrd,
 	});
 	try {
-		console.log("save")
+	
 		const saveUser = await user.save();
 		// res.send({ user: user._id });
 
 		const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET,
 			{ expiresIn: 300 });
-		res.header("auth-token", token).json({ auth: true, token: token, user: user });
+// delete user.password;
+saveUser.password = "";
+	console.log("saveUser", saveUser)
+
+	
+		res.header("auth-token", token).json({ auth: true, token: token, user: saveUser });
 	} catch (error) {
 		// res.status(400).send(error);
 		const msg = { msg: 'Error:' + error }
@@ -118,7 +122,7 @@ router.post("/login", async (req, res) => {
 
 	const { error } = loginValidation(req.body);
 	if (error) {
-		const msg = { auth: false, msg: 'Error:' + error.details[0].message }
+		const msg = { auth: false, msg: 'Login Error:' + error.details[0].message }
 		return res.status(400).json(msg);
 	}
 

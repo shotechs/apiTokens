@@ -127,8 +127,7 @@ const registerValidation = (data) => {
       .case("lower")
       .required()
       .label(`Email`),
-    password: Joi.string().min(6).required().label(`Password`),
-    repeat_password: Joi.ref("password").label(`Password Repeat`),
+    password: Joi.string().min(6).required().label(`Password`)
   });
   return schema.validate(data, options);
 };
