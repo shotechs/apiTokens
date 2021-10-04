@@ -37,13 +37,13 @@ const bjGameRoute = require("./routes/api/bjGame");
 //   res.send('<h1>hello world</h1>')
 // });
 
-mongoose.connect(
-  "mongodb://127.0.0.1:27017/bj_game",
-  { useUnifiedTopology: true, useNewUrlParser: true },
-  () => console.log("connected to db!")
-);
+// mongoose.connect(
+//   "mongodb://127.0.0.1:27017/bj_game",
+//   { useUnifiedTopology: true, useNewUrlParser: true },
+//   () => console.log("connected to db!")
+// );
 
-//mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true })
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 const db = mongoose.connection;
 db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to Database"));
