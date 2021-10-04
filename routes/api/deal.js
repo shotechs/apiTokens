@@ -11,8 +11,8 @@ function dealCards(id, bet) {
   let dealerCard4_txt = cards.getCard();
 
   //custom value
-  // playerCard1_txt = "s4";
-  // playerCard2_txt = "sj";
+  playerCard1_txt = "s7";
+  playerCard2_txt = "s3";
 
   // dealerCard3_txt = "sj";
   // dealerCard4_txt = "ca";

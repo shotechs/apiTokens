@@ -6,8 +6,10 @@ function DD(Game, hand) {
   if (playingGame.game_status != "Game Over") {
     if (hand == 1 && playingGame.playerCards.DD == true) {
       playingGame.playerCards.DD = false;
-      playingGame.playerCards.bet = 2 * playingGame.playerCards.bet;
-
+      // new bet /2 then * bet to get 2 to 3
+      const newbet =
+        (2 / playingGame.playerCards.bet) * playingGame.playerCards.bet;
+      playingGame.playerCards.bet = newbet;
       // playerCards get hit
 
       playingGame.playerCards.hit++;
@@ -117,7 +119,7 @@ router.patch("/dd", verify, getGame, async (req, res) => {
     try {
       //    const updatedGame = await gamePlaying.save()
       //   res.json(updatedGame)
-
+      console.log("DD", gamePlaying);
       res.json(gamePlaying);
     } catch (err) {
       res.status(400).json({ message: err.message });

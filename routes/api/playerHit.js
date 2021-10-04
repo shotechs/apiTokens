@@ -93,7 +93,7 @@ const playerhit = async (req, res) => {
 
     try {
       const updatedGame = await hitGame.save();
-      console.log("updatedGame", updatedGame);
+      //console.log("updatedGame", updatedGame);
       res.json(updatedGame);
     } catch (err) {
       res.status(400).json({ message: err.message });
